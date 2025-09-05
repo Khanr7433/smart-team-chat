@@ -1,31 +1,94 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import MessageList from './MessageList'
 import AIToolbar from './AIToolbar'
+import LoadingSpinner from '../common/LoadingSpinner'
+import { ConversationNotFoundState, ErrorState } from '../common/EmptyState'
+import { useToast } from '../common/Toast'
 import { getConversationById } from '../../data'
 
 const ChatWindowContainer = () => {
   const { id } = useParams()
   const navigate = useNavigate()
+  const [conversation, setConversation] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState(null)
   
-  // Get conversation details
-  const conversation = getConversationById(id)
-  
-  // Handle case when conversation is not found
+  const { showError } = useToast()
+
+  useEffect(() => {
+    const loadConversation = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+        
+        // Simulate loading delay
+        await new Promise(resolve => setTimeout(resolve, 300))
+        
+        const conv = getConversationById(id)
+        if (!conv) {
+          setError('Conversation not found')
+          return
+        }
+        
+        setConversation(conv)
+      } catch (err) {
+        console.error('Error loading conversation:', err)
+        setError(err.message || 'Failed to load conversation')
+        showError('Failed to load conversation. Please try again.')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    if (id) {
+      loadConversation()
+    }
+  }, [id, showError])
+
+  const handleGoBack = () => {
+    navigate('/')
+  }
+
+  const handleRetry = () => {
+    window.location.reload()
+  }
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <LoadingSpinner size="lg" text="Loading conversation..." />
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    if (error === 'Conversation not found') {
+      return (
+        <div className="flex items-center justify-center h-full">
+          <ConversationNotFoundState onGoBack={handleGoBack} />
+        </div>
+      )
+    }
+    
+    return (
+      <div className="flex items-center justify-center h-full">
+        <ErrorState
+          title="Failed to load conversation"
+          description={error}
+          onRetry={handleRetry}
+        />
+      </div>
+    )
+  }
+
+  // No conversation found
   if (!conversation) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-gray-50">
-        <div className="text-center text-gray-500">
-          <div className="text-4xl mb-4">❌</div>
-          <p className="text-lg font-medium">Conversation not found</p>
-          <p className="text-sm mb-4">The conversation you're looking for doesn't exist.</p>
-          <button
-            onClick={() => navigate('/')}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            Back to Chat List
-          </button>
-        </div>
+      <div className="flex items-center justify-center h-full">
+        <ConversationNotFoundState onGoBack={handleGoBack} />
       </div>
     )
   }

@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ConversationItem from './ConversationItem'
+import LoadingSpinner from '../common/LoadingSpinner'
+import { NoConversationsState, ErrorState } from '../common/EmptyState'
+import { useToast } from '../common/Toast'
 import { conversations } from '../../data/conversations.json'
 
 const ChatListContainer = ({ isDesktopSidebar = false }) => {
@@ -8,11 +11,38 @@ const ChatListContainer = ({ isDesktopSidebar = false }) => {
   const [conversationList, setConversationList] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
   const [filteredConversations, setFilteredConversations] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState(null)
+  
+  const { showError } = useToast()
 
   // Load conversations on component mount
   useEffect(() => {
-    setConversationList(conversations)
-    setFilteredConversations(conversations)
+    const loadConversations = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+        
+        // Simulate loading delay for better UX demonstration
+        await new Promise(resolve => setTimeout(resolve, 500))
+        
+        if (!conversations || conversations.length === 0) {
+          setConversationList([])
+          setFilteredConversations([])
+        } else {
+          setConversationList(conversations)
+          setFilteredConversations(conversations)
+        }
+      } catch (err) {
+        console.error('Error loading conversations:', err)
+        setError(err.message || 'Failed to load conversations')
+        showError('Failed to load conversations. Please try again.')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    loadConversations()
   }, [])
 
   // Filter conversations based on search term
@@ -34,6 +64,32 @@ const ChatListContainer = ({ isDesktopSidebar = false }) => {
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value)
+  }
+
+  const handleRetry = () => {
+    window.location.reload()
+  }
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <LoadingSpinner size="lg" text="Loading conversations..." />
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <ErrorState
+          title="Failed to load conversations"
+          description={error}
+          onRetry={handleRetry}
+        />
+      </div>
+    )
   }
 
   if (isDesktopSidebar) {
@@ -70,14 +126,16 @@ const ChatListContainer = ({ isDesktopSidebar = false }) => {
                 />
               ))}
             </div>
-          ) : (
+          ) : searchTerm ? (
             <div className="flex flex-col items-center justify-center h-full text-gray-500 p-8">
               <svg className="h-12 w-12 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
               <p className="text-lg font-medium mb-2">No conversations found</p>
               <p className="text-sm text-center">Try adjusting your search</p>
             </div>
+          ) : (
+            <NoConversationsState onCreateNew={handleNewChat} />
           )}
         </div>
       </div>
@@ -119,14 +177,16 @@ const ChatListContainer = ({ isDesktopSidebar = false }) => {
               />
             ))}
           </div>
-        ) : (
+        ) : searchTerm ? (
           <div className="flex flex-col items-center justify-center h-full text-gray-500 p-8">
             <svg className="h-12 w-12 lg:h-16 lg:w-16 mb-4 lg:mb-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <p className="text-lg lg:text-xl font-medium mb-2">No conversations found</p>
             <p className="text-sm lg:text-base text-center max-w-sm">Try adjusting your search or start a new chat</p>
           </div>
+        ) : (
+          <NoConversationsState onCreateNew={handleNewChat} />
         )}
       </div>
 

@@ -1,12 +1,47 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import MessageBubble from './MessageBubble'
+import LoadingSpinner from '../common/LoadingSpinner'
+import { NoMessagesState, ErrorState } from '../common/EmptyState'
+import { useToast } from '../common/Toast'
 import { getMessagesForConversation } from '../../data'
 
 const MessageList = ({ conversationId }) => {
   const messagesEndRef = useRef(null)
+  const [messages, setMessages] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState(null)
   
-  // Get messages for the selected conversation
-  const messages = getMessagesForConversation(conversationId)
+  const { showError } = useToast()
+
+  // Load messages when conversationId changes
+  useEffect(() => {
+    const loadMessages = async () => {
+      if (!conversationId) {
+        setMessages([])
+        setIsLoading(false)
+        return
+      }
+
+      try {
+        setIsLoading(true)
+        setError(null)
+        
+        // Simulate loading delay
+        await new Promise(resolve => setTimeout(resolve, 200))
+        
+        const messageList = getMessagesForConversation(conversationId)
+        setMessages(messageList || [])
+      } catch (err) {
+        console.error('Error loading messages:', err)
+        setError(err.message || 'Failed to load messages')
+        showError('Failed to load messages. Please try again.')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    loadMessages()
+  }, [conversationId, showError])
   
   // Auto-scroll to bottom when messages change
   const scrollToBottom = () => {
@@ -17,6 +52,10 @@ const MessageList = ({ conversationId }) => {
     scrollToBottom()
   }, [messages])
   
+  const handleRetry = () => {
+    window.location.reload()
+  }
+
   // Handle case when no conversation is selected
   if (!conversationId) {
     return (
@@ -29,16 +68,34 @@ const MessageList = ({ conversationId }) => {
       </div>
     )
   }
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center bg-gray-50">
+        <LoadingSpinner size="lg" text="Loading messages..." />
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex-1 flex items-center justify-center bg-gray-50">
+        <ErrorState
+          title="Failed to load messages"
+          description={error}
+          onRetry={handleRetry}
+        />
+      </div>
+    )
+  }
   
   // Handle case when conversation has no messages
   if (!messages || messages.length === 0) {
     return (
       <div className="flex-1 flex items-center justify-center bg-gray-50">
-        <div className="text-center text-gray-500">
-          <div className="text-4xl mb-4">📝</div>
-          <p className="text-lg font-medium">No messages yet</p>
-          <p className="text-sm">Start the conversation!</p>
-        </div>
+        <NoMessagesState />
       </div>
     )
   }

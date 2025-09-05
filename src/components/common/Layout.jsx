@@ -1,5 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { ChatListContainer } from '../ChatList'
+import ErrorHandlingDemo from './ErrorHandlingDemo'
 
 const Layout = ({ children }) => {
   const navigate = useNavigate()
@@ -111,6 +112,9 @@ const Layout = ({ children }) => {
       <main className="lg:hidden bg-white min-h-[calc(100vh-64px)]">
         {children}
       </main>
+
+      {/* Error Handling Demo - Development Only */}
+      <ErrorHandlingDemo />
     </div>
   )
 }
