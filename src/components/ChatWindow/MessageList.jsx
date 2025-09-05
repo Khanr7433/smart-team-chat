@@ -3,6 +3,7 @@ import MessageBubble from './MessageBubble'
 import LoadingSpinner from '../common/LoadingSpinner'
 import { NoMessagesState, ErrorState } from '../common/EmptyState'
 import { useToast } from '../common/Toast'
+import { useAccessibility } from '../../hooks/useAccessibility'
 import { getMessagesForConversation } from '../../data'
 
 const MessageList = ({ conversationId }) => {
@@ -12,6 +13,7 @@ const MessageList = ({ conversationId }) => {
   const [error, setError] = useState(null)
   
   const { showError } = useToast()
+  const { announceToScreenReader } = useAccessibility()
 
   // Load messages when conversationId changes
   useEffect(() => {
@@ -31,6 +33,12 @@ const MessageList = ({ conversationId }) => {
         
         const messageList = getMessagesForConversation(conversationId)
         setMessages(messageList || [])
+        
+        // Announce message count to screen readers
+        const messageCount = messageList?.length || 0
+        announceToScreenReader(
+          `Loaded ${messageCount} message${messageCount !== 1 ? 's' : ''} in conversation`
+        )
       } catch (err) {
         console.error('Error loading messages:', err)
         setError(err.message || 'Failed to load messages')
@@ -101,20 +109,30 @@ const MessageList = ({ conversationId }) => {
   }
   
   return (
-    <div className="flex-1 overflow-y-auto bg-gray-50 lg:bg-gray-25 py-4 lg:py-6 custom-scrollbar">
+    <div 
+      className="flex-1 overflow-y-auto bg-gray-50 lg:bg-gray-25 py-4 lg:py-6 custom-scrollbar"
+      role="log"
+      aria-label="Chat messages"
+      aria-live="polite"
+    >
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Messages list */}
-        <div className="space-y-1 lg:space-y-2">
+        <div 
+          className="space-y-1 lg:space-y-2"
+          role="list"
+          aria-label={`${messages.length} message${messages.length !== 1 ? 's' : ''} in conversation`}
+        >
           {messages.map((message) => (
-            <MessageBubble 
-              key={message.id} 
-              message={message} 
-            />
+            <div key={message.id} role="listitem">
+              <MessageBubble 
+                message={message} 
+              />
+            </div>
           ))}
         </div>
         
         {/* Invisible element to scroll to */}
-        <div ref={messagesEndRef} />
+        <div ref={messagesEndRef} aria-hidden="true" />
       </div>
     </div>
   )

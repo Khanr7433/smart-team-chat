@@ -1,7 +1,30 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
+import { useAccessibility } from '../../hooks/useAccessibility'
 
 const ReplyModal = ({ isOpen, onClose, smartReply }) => {
   const [selectedReply, setSelectedReply] = useState('')
+  const modalRef = useRef(null)
+  const { useFocusTrap } = useAccessibility()
+  
+  useFocusTrap(isOpen, modalRef)
+
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        onClose()
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape)
+      document.body.style.overflow = 'hidden'
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape)
+      document.body.style.overflow = 'unset'
+    }
+  }, [isOpen, onClose])
 
   if (!isOpen) return null
 
@@ -12,17 +35,36 @@ const ReplyModal = ({ isOpen, onClose, smartReply }) => {
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 sm:p-6 lg:p-8">
-      <div className="bg-white rounded-lg lg:rounded-xl max-w-sm sm:max-w-md lg:max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-xl">
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 sm:p-6 lg:p-8"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="reply-modal-title"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose()
+        }
+      }}
+    >
+      <div 
+        ref={modalRef}
+        className="bg-white rounded-lg lg:rounded-xl max-w-sm sm:max-w-md lg:max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-xl"
+        tabIndex={-1}
+      >
         <div className="p-6 sm:p-8 lg:p-10">
           <div className="flex justify-between items-start mb-4 lg:mb-6">
-            <h2 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-900 pr-4">Smart Reply Suggestion</h2>
+            <h2 
+              id="reply-modal-title"
+              className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-900 pr-4"
+            >
+              Smart Reply Suggestion
+            </h2>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-              aria-label="Close modal"
+              aria-label="Close smart reply modal"
             >
-              <svg className="w-6 h-6 lg:w-7 lg:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 lg:w-7 lg:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -42,8 +84,23 @@ const ReplyModal = ({ isOpen, onClose, smartReply }) => {
                     : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'
                 }`}
                 onClick={() => setSelectedReply(smartReply)}
+                role="radio"
+                tabIndex={0}
+                aria-checked={selectedReply === smartReply}
+                aria-labelledby="reply-option-label"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    setSelectedReply(smartReply)
+                  }
+                }}
               >
-                <p className="text-gray-800 lg:text-lg leading-relaxed">{smartReply}</p>
+                <p 
+                  id="reply-option-label"
+                  className="text-gray-800 lg:text-lg leading-relaxed"
+                >
+                  {smartReply}
+                </p>
               </div>
             </div>
           </div>

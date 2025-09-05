@@ -4,6 +4,7 @@ import ConversationItem from './ConversationItem'
 import LoadingSpinner from '../common/LoadingSpinner'
 import { NoConversationsState, ErrorState } from '../common/EmptyState'
 import { useToast } from '../common/Toast'
+import { useAccessibility } from '../../hooks/useAccessibility'
 import { conversations } from '../../data/conversations.json'
 
 const ChatListContainer = ({ isDesktopSidebar = false }) => {
@@ -15,6 +16,7 @@ const ChatListContainer = ({ isDesktopSidebar = false }) => {
   const [error, setError] = useState(null)
   
   const { showError } = useToast()
+  const { announceToScreenReader } = useAccessibility()
 
   // Load conversations on component mount
   useEffect(() => {
@@ -55,8 +57,16 @@ const ChatListContainer = ({ isDesktopSidebar = false }) => {
         conversation.lastMessage.toLowerCase().includes(searchTerm.toLowerCase())
       )
       setFilteredConversations(filtered)
+      
+      // Announce search results to screen readers
+      const resultCount = filtered.length
+      if (searchTerm.trim()) {
+        announceToScreenReader(
+          `Search results: ${resultCount} conversation${resultCount !== 1 ? 's' : ''} found`
+        )
+      }
     }
-  }, [searchTerm, conversationList])
+  }, [searchTerm, conversationList, announceToScreenReader])
 
   const handleNewChat = () => {
     navigate('/new-chat')
@@ -110,6 +120,8 @@ const ChatListContainer = ({ isDesktopSidebar = false }) => {
               value={searchTerm}
               onChange={handleSearchChange}
               className="block w-full pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+              aria-label="Search conversations by name or message content"
+              role="searchbox"
             />
           </div>
         </div>
@@ -117,13 +129,18 @@ const ChatListContainer = ({ isDesktopSidebar = false }) => {
         {/* Conversation list */}
         <div className="flex-1 overflow-y-auto custom-scrollbar">
           {filteredConversations.length > 0 ? (
-            <div>
-              {filteredConversations.map((conversation) => (
-                <ConversationItem
-                  key={conversation.id}
-                  conversation={conversation}
-                  isDesktopSidebar={true}
-                />
+            <div 
+              role="list" 
+              aria-label={`${filteredConversations.length} conversation${filteredConversations.length !== 1 ? 's' : ''}`}
+            >
+              {filteredConversations.map((conversation, index) => (
+                <div key={conversation.id} role="listitem">
+                  <ConversationItem
+                    conversation={conversation}
+                    isDesktopSidebar={true}
+                    index={index}
+                  />
+                </div>
               ))}
             </div>
           ) : searchTerm ? (
@@ -162,6 +179,8 @@ const ChatListContainer = ({ isDesktopSidebar = false }) => {
             value={searchTerm}
             onChange={handleSearchChange}
             className="block w-full pl-10 lg:pl-12 pr-3 py-2 lg:py-3 text-sm lg:text-base border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+            aria-label="Search conversations by name or message content"
+            role="searchbox"
           />
         </div>
       </div>
@@ -169,12 +188,18 @@ const ChatListContainer = ({ isDesktopSidebar = false }) => {
       {/* Conversation list */}
       <div className="flex-1 overflow-y-auto">
         {filteredConversations.length > 0 ? (
-          <div className="divide-y divide-gray-100">
-            {filteredConversations.map((conversation) => (
-              <ConversationItem
-                key={conversation.id}
-                conversation={conversation}
-              />
+          <div 
+            className="divide-y divide-gray-100"
+            role="list" 
+            aria-label={`${filteredConversations.length} conversation${filteredConversations.length !== 1 ? 's' : ''}`}
+          >
+            {filteredConversations.map((conversation, index) => (
+              <div key={conversation.id} role="listitem">
+                <ConversationItem
+                  conversation={conversation}
+                  index={index}
+                />
+              </div>
             ))}
           </div>
         ) : searchTerm ? (
