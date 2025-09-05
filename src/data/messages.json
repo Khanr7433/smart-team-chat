@@ -1,0 +1,121 @@
+{
+  "messageThreads": {
+    "1": [
+      {
+        "id": "1",
+        "senderId": "alice",
+        "senderName": "Alice Johnson",
+        "content": "Hey! How's the project coming along?",
+        "timestamp": "2025-09-05T14:00:00Z",
+        "isCurrentUser": false
+      },
+      {
+        "id": "2",
+        "senderId": "current",
+        "senderName": "You",
+        "content": "Going well! Just finished the user authentication module.",
+        "timestamp": "2025-09-05T14:15:00Z",
+        "isCurrentUser": true
+      },
+      {
+        "id": "3",
+        "senderId": "alice",
+        "senderName": "Alice Johnson",
+        "content": "That's awesome! The timeline looks good then.",
+        "timestamp": "2025-09-05T14:25:00Z",
+        "isCurrentUser": false
+      },
+      {
+        "id": "4",
+        "senderId": "alice",
+        "senderName": "Alice Johnson",
+        "content": "Thanks for the update on the project!",
+        "timestamp": "2025-09-05T14:30:00Z",
+        "isCurrentUser": false
+      }
+    ],
+    "2": [
+      {
+        "id": "5",
+        "senderId": "bob",
+        "senderName": "Bob Chen",
+        "content": "Hi there! Hope you're doing well.",
+        "timestamp": "2025-09-05T13:30:00Z",
+        "isCurrentUser": false
+      },
+      {
+        "id": "6",
+        "senderId": "current",
+        "senderName": "You",
+        "content": "Hey Bob! Yes, all good here. What's up?",
+        "timestamp": "2025-09-05T13:35:00Z",
+        "isCurrentUser": true
+      },
+      {
+        "id": "7",
+        "senderId": "bob",
+        "senderName": "Bob Chen",
+        "content": "Let's schedule a meeting for next week",
+        "timestamp": "2025-09-05T13:45:00Z",
+        "isCurrentUser": false
+      }
+    ]
+  }
+},
+    
+"3": [
+      {
+        "id": "8",
+        "senderId": "current",
+        "senderName": "You",
+        "content": "Here's the latest design mockup for the dashboard",
+        "timestamp": "2025-09-05T12:00:00Z",
+        "isCurrentUser": true
+      },
+      {
+        "id": "9",
+        "senderId": "sarah",
+        "senderName": "Sarah Williams",
+        "content": "The design looks great! 👍",
+        "timestamp": "2025-09-05T12:20:00Z",
+        "isCurrentUser": false
+      }
+    ],
+    "4": [
+      {
+        "id": "10",
+        "senderId": "mike",
+        "senderName": "Mike Rodriguez",
+        "content": "I've pushed the latest changes to the feature branch",
+        "timestamp": "2025-09-05T11:00:00Z",
+        "isCurrentUser": false
+      },
+      {
+        "id": "11",
+        "senderId": "mike",
+        "senderName": "Mike Rodriguez",
+        "content": "Can you review the code changes?",
+        "timestamp": "2025-09-05T11:15:00Z",
+        "isCurrentUser": false
+      }
+    ],
+    "5": [
+      {
+        "id": "12",
+        "senderId": "current",
+        "senderName": "You",
+        "content": "Could you help with the API integration for the user profiles?",
+        "timestamp": "2025-09-05T10:15:00Z",
+        "isCurrentUser": true
+      },
+      {
+        "id": "13",
+        "senderId": "emma",
+        "senderName": "Emma Davis",
+        "content": "Perfect! I'll get started on that right away.",
+        "timestamp": "2025-09-05T10:30:00Z",
+        "isCurrentUser": false
+      }
+    ]
+  }
+}

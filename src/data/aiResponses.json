@@ -1,0 +1,39 @@
+{
+  "summaries": [
+    {
+      "conversationId": "1",
+      "content": "This conversation discusses project progress updates. Alice inquired about the project status, and you provided an update on completing the user authentication module. Alice expressed satisfaction with the timeline and thanked you for the update.",
+      "confidence": 0.92
+    },
+    {
+      "conversationId": "2", 
+      "content": "Bob initiated a friendly check-in and proposed scheduling a meeting for next week. The conversation maintains a professional yet casual tone.",
+      "confidence": 0.88
+    },
+    {
+      "conversationId": "3",
+      "content": "You shared a design mockup for the dashboard, and Sarah provided positive feedback, indicating approval of the design work.",
+      "confidence": 0.95
+    }
+  ],
+  "smartReplies": [
+    "That sounds great! Let me know if you need any help.",
+    "Thanks for the update. I'll review this and get back to you.",
+    "Perfect timing! I was just thinking about this.",
+    "Absolutely! I'm available for a quick call if needed.",
+    "Great work on this. The approach looks solid.",
+    "I agree with your assessment. Let's move forward with this plan.",
+    "Thanks for keeping me in the loop. Much appreciated!",
+    "This looks good to me. When do you think we can implement it?"
+  ],
+  "icebreakers": [
+    "Hi [name]! Hope you're having a great day. I wanted to touch base about our upcoming project.",
+    "Hey [name]! I came across something that reminded me of our last conversation. How are things going?",
+    "Hi [name]! I hope this message finds you well. I'd love to catch up when you have a moment.",
+    "Hello [name]! I've been thinking about our discussion on [topic]. Do you have time for a quick chat?",
+    "Hey [name]! I hope your week is going smoothly. I wanted to follow up on our previous conversation.",
+    "Hi [name]! I saw your recent work on [project] and wanted to congratulate you. Looks fantastic!",
+    "Hello [name]! I hope you're doing well. I have an idea I'd love to run by you.",
+    "Hey [name]! I hope you're having a productive day. I wanted to reach out about a potential collaboration."
+  ]
+}
