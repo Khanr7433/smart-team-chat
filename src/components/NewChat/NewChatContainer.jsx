@@ -71,17 +71,17 @@ const NewChatContainer = () => {
   }
 
   return (
-    <div className="max-w-md mx-auto p-6 space-y-6">
+    <div className="max-w-sm sm:max-w-md lg:max-w-2xl mx-auto p-6 sm:p-8 lg:p-12 space-y-6 lg:space-y-8 lg:min-h-0">
       {/* Header */}
-      <div className="text-center space-y-2">
-        <h1 className="text-2xl font-bold text-gray-900">Start New Chat</h1>
-        <p className="text-gray-600">
+      <div className="text-center space-y-2 lg:space-y-4">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">Start New Chat</h1>
+        <p className="text-gray-600 lg:text-lg max-w-lg mx-auto leading-relaxed">
           Enter a participant name and optionally use AI to generate conversation starters
         </p>
       </div>
 
       {/* Form */}
-      <div className="space-y-6">
+      <div className="space-y-6 lg:space-y-8">
         {/* Participant Input */}
         <ParticipantInput
           value={participantName}
@@ -98,17 +98,17 @@ const NewChatContainer = () => {
 
         {/* Selected Icebreaker Preview */}
         {selectedIcebreaker && (
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
+          <div className="space-y-2 lg:space-y-3">
+            <label className="block text-sm lg:text-base font-medium text-gray-700">
               Selected Icebreaker
             </label>
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-sm text-blue-900 leading-relaxed">
+            <div className="p-4 lg:p-6 bg-blue-50 border border-blue-200 rounded-lg lg:rounded-xl">
+              <p className="text-sm lg:text-base text-blue-900 leading-relaxed">
                 {selectedIcebreaker}
               </p>
               <button
                 onClick={() => setSelectedIcebreaker('')}
-                className="mt-2 text-xs text-blue-600 hover:text-blue-800 underline"
+                className="mt-2 lg:mt-3 text-xs lg:text-sm text-blue-600 hover:text-blue-800 underline transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
               >
                 Clear selection
               </button>
@@ -117,10 +117,10 @@ const NewChatContainer = () => {
         )}
 
         {/* Action Buttons */}
-        <div className="flex space-x-3 pt-4">
+        <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 pt-4 lg:pt-6">
           <button
             onClick={handleCancel}
-            className="flex-1 px-4 py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors"
+            className="w-full sm:flex-1 px-4 lg:px-6 py-3 lg:py-4 text-gray-700 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 rounded-lg lg:rounded-xl font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
           >
             Cancel
           </button>
@@ -128,10 +128,10 @@ const NewChatContainer = () => {
             onClick={handleStartChat}
             disabled={!isParticipantValid}
             className={`
-              flex-1 px-4 py-3 rounded-lg font-medium transition-all duration-200
+              w-full sm:flex-1 px-4 lg:px-6 py-3 lg:py-4 rounded-lg lg:rounded-xl font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2
               ${isParticipantValid
-                ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-sm hover:shadow-md'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                ? 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white shadow-sm hover:shadow-md focus:ring-blue-500'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed focus:ring-gray-300'
               }
             `}
           >
@@ -142,7 +142,7 @@ const NewChatContainer = () => {
 
       {/* Help Text */}
       <div className="text-center">
-        <p className="text-xs text-gray-500">
+        <p className="text-xs lg:text-sm text-gray-500 max-w-md mx-auto leading-relaxed">
           {selectedIcebreaker 
             ? 'Your selected icebreaker will be ready to send when you start the chat'
             : 'You can start chatting immediately or use an AI-generated icebreaker'

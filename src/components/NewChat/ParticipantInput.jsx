@@ -21,10 +21,10 @@ const ParticipantInput = ({ value, onChange, error, onValidation }) => {
   const showError = touched && error
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 lg:space-y-3">
       <label 
         htmlFor="participant-name" 
-        className="block text-sm font-medium text-gray-700"
+        className="block text-sm lg:text-base font-medium text-gray-700"
       >
         Participant Name
       </label>
@@ -37,11 +37,11 @@ const ParticipantInput = ({ value, onChange, error, onValidation }) => {
           onBlur={handleBlur}
           placeholder="Enter participant name..."
           className={`
-            w-full px-4 py-3 border rounded-lg text-sm
+            w-full px-4 lg:px-6 py-3 lg:py-4 border rounded-lg lg:rounded-xl text-sm lg:text-base
             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-            transition-colors duration-200
+            transition-all duration-200
             ${showError 
-              ? 'border-red-300 bg-red-50' 
+              ? 'border-red-300 bg-red-50 focus:ring-red-500' 
               : 'border-gray-300 hover:border-gray-400 focus:border-blue-500'
             }
           `}
@@ -49,9 +49,9 @@ const ParticipantInput = ({ value, onChange, error, onValidation }) => {
           aria-describedby={showError ? 'participant-name-error' : undefined}
         />
         {showError && (
-          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+          <div className="absolute inset-y-0 right-0 pr-3 lg:pr-4 flex items-center pointer-events-none">
             <svg 
-              className="h-5 w-5 text-red-400" 
+              className="h-5 w-5 lg:h-6 lg:w-6 text-red-400" 
               fill="currentColor" 
               viewBox="0 0 20 20"
               aria-hidden="true"
@@ -68,13 +68,13 @@ const ParticipantInput = ({ value, onChange, error, onValidation }) => {
       {showError && (
         <p 
           id="participant-name-error" 
-          className="text-sm text-red-600"
+          className="text-sm lg:text-base text-red-600"
           role="alert"
         >
           {error}
         </p>
       )}
-      <p className="text-xs text-gray-500">
+      <p className="text-xs lg:text-sm text-gray-500">
         Enter the name of the person you want to chat with
       </p>
     </div>

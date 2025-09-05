@@ -44,10 +44,10 @@ const MessageList = ({ conversationId }) => {
   }
   
   return (
-    <div className="flex-1 overflow-y-auto bg-gray-50 px-4 py-6">
-      <div className="max-w-4xl mx-auto">
+    <div className="flex-1 overflow-y-auto bg-gray-50 lg:bg-gray-25 py-4 lg:py-6 custom-scrollbar">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Messages list */}
-        <div className="space-y-1">
+        <div className="space-y-1 lg:space-y-2">
           {messages.map((message) => (
             <MessageBubble 
               key={message.id} 
