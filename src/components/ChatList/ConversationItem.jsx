@@ -1,21 +1,26 @@
+import React, { useCallback, useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { buildChatRoute } from '../../utils/navigation'
 import { useAccessibility } from '../../hooks/useAccessibility'
 
-const ConversationItem = ({ conversation, isDesktopSidebar = false, index }) => {
+const ConversationItem = React.memo(({ conversation, isDesktopSidebar = false, index }) => {
   const navigate = useNavigate()
   const location = useLocation()
   const { announceToScreenReader, generateId } = useAccessibility()
 
-  const handleClick = () => {
+  const handleClick = useCallback(() => {
     navigate(buildChatRoute(conversation.id))
     announceToScreenReader(`Opened chat with ${conversation.participantName}`)
-  }
+  }, [navigate, conversation.id, conversation.participantName, announceToScreenReader])
 
-  const isActive = location.pathname === buildChatRoute(conversation.id)
-  const conversationId = generateId('conversation')
+  const isActive = useMemo(() => 
+    location.pathname === buildChatRoute(conversation.id), 
+    [location.pathname, conversation.id]
+  )
+  
+  const conversationId = useMemo(() => generateId('conversation'), [generateId])
 
-  const formatTimestamp = (timestamp) => {
+  const formatTimestamp = useCallback((timestamp) => {
     const date = new Date(timestamp)
     const now = new Date()
     const diffInHours = (now - date) / (1000 * 60 * 60)
@@ -27,7 +32,12 @@ const ConversationItem = ({ conversation, isDesktopSidebar = false, index }) => 
     } else {
       return date.toLocaleDateString()
     }
-  }
+  }, [])
+
+  const formattedTimestamp = useMemo(() => 
+    formatTimestamp(conversation.timestamp), 
+    [conversation.timestamp, formatTimestamp]
+  )
 
   if (isDesktopSidebar) {
     // Desktop sidebar styling
@@ -75,9 +85,9 @@ const ConversationItem = ({ conversation, isDesktopSidebar = false, index }) => 
             <span 
               id={`${conversationId}-time`}
               className="text-xs text-gray-500 flex-shrink-0 ml-2"
-              aria-label={`Last message ${formatTimestamp(conversation.timestamp)}`}
+              aria-label={`Last message ${formattedTimestamp}`}
             >
-              {formatTimestamp(conversation.timestamp)}
+              {formattedTimestamp}
             </span>
           </div>
           <p 
@@ -146,9 +156,9 @@ const ConversationItem = ({ conversation, isDesktopSidebar = false, index }) => 
           <span 
             id={`${conversationId}-time-mobile`}
             className="text-xs lg:text-sm text-gray-500 flex-shrink-0 ml-2 lg:ml-3"
-            aria-label={`Last message ${formatTimestamp(conversation.timestamp)}`}
+            aria-label={`Last message ${formattedTimestamp}`}
           >
-            {formatTimestamp(conversation.timestamp)}
+            {formattedTimestamp}
           </span>
         </div>
         <p 
@@ -173,6 +183,6 @@ const ConversationItem = ({ conversation, isDesktopSidebar = false, index }) => 
       )}
     </div>
   )
-}
+})
 
 export default ConversationItem

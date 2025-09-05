@@ -1,13 +1,15 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ConversationItem from './ConversationItem'
 import LoadingSpinner from '../common/LoadingSpinner'
+import LoadingSkeleton from '../common/LoadingSkeleton'
 import { NoConversationsState, ErrorState } from '../common/EmptyState'
 import { useToast } from '../common/Toast'
 import { useAccessibility } from '../../hooks/useAccessibility'
 import { conversations } from '../../data/conversations.json'
+import { debounce } from '../../utils/performance'
 
-const ChatListContainer = ({ isDesktopSidebar = false }) => {
+const ChatListContainer = React.memo(({ isDesktopSidebar = false }) => {
   const navigate = useNavigate()
   const [conversationList, setConversationList] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
@@ -68,23 +70,55 @@ const ChatListContainer = ({ isDesktopSidebar = false }) => {
     }
   }, [searchTerm, conversationList, announceToScreenReader])
 
-  const handleNewChat = () => {
+  const handleNewChat = useCallback(() => {
     navigate('/new-chat')
-  }
+  }, [navigate])
 
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value)
-  }
+  const debouncedSearch = useMemo(
+    () => debounce((value) => setSearchTerm(value), 300),
+    []
+  )
 
-  const handleRetry = () => {
+  const handleSearchChange = useCallback((e) => {
+    debouncedSearch(e.target.value)
+  }, [debouncedSearch])
+
+  const handleRetry = useCallback(() => {
     window.location.reload()
-  }
+  }, [])
+
+  // Memoize conversation list rendering for better performance
+  const conversationElements = useMemo(() => {
+    return filteredConversations.map((conversation, index) => (
+      <div 
+        key={conversation.id} 
+        role="listitem"
+        className="animate-fade-in conversation-item"
+        style={{ animationDelay: `${index * 0.05}s` }}
+      >
+        <ConversationItem
+          conversation={conversation}
+          isDesktopSidebar={isDesktopSidebar}
+          index={index}
+        />
+      </div>
+    ))
+  }, [filteredConversations, isDesktopSidebar])
 
   // Loading state
   if (isLoading) {
+    if (isDesktopSidebar) {
+      return (
+        <div className="flex flex-col h-full">
+          <LoadingSkeleton type="search" count={1} />
+          <LoadingSkeleton type="conversation" count={5} />
+        </div>
+      )
+    }
     return (
-      <div className="flex items-center justify-center h-full">
-        <LoadingSpinner size="lg" text="Loading conversations..." />
+      <div className="flex flex-col h-full bg-white">
+        <LoadingSkeleton type="search" count={1} />
+        <LoadingSkeleton type="conversation" count={6} />
       </div>
     )
   }
@@ -132,16 +166,9 @@ const ChatListContainer = ({ isDesktopSidebar = false }) => {
             <div 
               role="list" 
               aria-label={`${filteredConversations.length} conversation${filteredConversations.length !== 1 ? 's' : ''}`}
+              className="stagger-animation"
             >
-              {filteredConversations.map((conversation, index) => (
-                <div key={conversation.id} role="listitem">
-                  <ConversationItem
-                    conversation={conversation}
-                    isDesktopSidebar={true}
-                    index={index}
-                  />
-                </div>
-              ))}
+              {conversationElements}
             </div>
           ) : searchTerm ? (
             <div className="flex flex-col items-center justify-center h-full text-gray-500 p-8">
@@ -189,18 +216,11 @@ const ChatListContainer = ({ isDesktopSidebar = false }) => {
       <div className="flex-1 overflow-y-auto">
         {filteredConversations.length > 0 ? (
           <div 
-            className="divide-y divide-gray-100"
+            className="divide-y divide-gray-100 stagger-animation"
             role="list" 
             aria-label={`${filteredConversations.length} conversation${filteredConversations.length !== 1 ? 's' : ''}`}
           >
-            {filteredConversations.map((conversation, index) => (
-              <div key={conversation.id} role="listitem">
-                <ConversationItem
-                  conversation={conversation}
-                  index={index}
-                />
-              </div>
-            ))}
+            {conversationElements}
           </div>
         ) : searchTerm ? (
           <div className="flex flex-col items-center justify-center h-full text-gray-500 p-8">
@@ -218,7 +238,7 @@ const ChatListContainer = ({ isDesktopSidebar = false }) => {
       {/* Floating action button for new chat - only on mobile */}
       <button
         onClick={handleNewChat}
-        className="fixed bottom-6 right-6 lg:bottom-8 lg:right-8 bg-blue-500 hover:bg-blue-600 text-white rounded-full p-4 lg:p-5 shadow-lg hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 z-50 lg:hidden"
+        className="fixed bottom-6 right-6 lg:bottom-8 lg:right-8 bg-blue-500 hover:bg-blue-600 text-white rounded-full p-4 lg:p-5 shadow-lg hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 z-50 lg:hidden fab-pulse hover-lift btn-primary"
         aria-label="Start new chat"
       >
         <svg className="h-6 w-6 lg:h-7 lg:w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -227,6 +247,6 @@ const ChatListContainer = ({ isDesktopSidebar = false }) => {
       </button>
     </div>
   )
-}
+})
 
 export default ChatListContainer

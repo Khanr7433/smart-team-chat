@@ -1,18 +1,19 @@
+import React, { useMemo, useCallback } from 'react'
 import { useAccessibility } from '../../hooks/useAccessibility'
 
-const MessageBubble = ({ message }) => {
+const MessageBubble = React.memo(({ message }) => {
   const { generateId } = useAccessibility()
   
-  const formatTimestamp = (timestamp) => {
+  const formatTimestamp = useCallback((timestamp) => {
     const date = new Date(timestamp)
     return date.toLocaleTimeString([], { 
       hour: '2-digit', 
       minute: '2-digit',
       hour12: true 
     })
-  }
+  }, [])
 
-  const formatTimestampForScreenReader = (timestamp) => {
+  const formatTimestampForScreenReader = useCallback((timestamp) => {
     const date = new Date(timestamp)
     return date.toLocaleString([], {
       weekday: 'long',
@@ -23,10 +24,20 @@ const MessageBubble = ({ message }) => {
       minute: '2-digit',
       hour12: true
     })
-  }
+  }, [])
 
   const isCurrentUser = message.isCurrentUser
-  const messageId = generateId('message')
+  const messageId = useMemo(() => generateId('message'), [generateId])
+  
+  const formattedTime = useMemo(() => 
+    formatTimestamp(message.timestamp), 
+    [message.timestamp, formatTimestamp]
+  )
+  
+  const formattedTimeForScreenReader = useMemo(() => 
+    formatTimestampForScreenReader(message.timestamp), 
+    [message.timestamp, formatTimestampForScreenReader]
+  )
 
   return (
     <div 
@@ -77,9 +88,9 @@ const MessageBubble = ({ message }) => {
           <time 
             id={`${messageId}-time`}
             dateTime={message.timestamp}
-            aria-label={`Sent ${formatTimestampForScreenReader(message.timestamp)}`}
+            aria-label={`Sent ${formattedTimeForScreenReader}`}
           >
-            {formatTimestamp(message.timestamp)}
+            {formattedTime}
           </time>
         </div>
       </div>
@@ -100,6 +111,6 @@ const MessageBubble = ({ message }) => {
       )}
     </div>
   )
-}
+})
 
 export default MessageBubble

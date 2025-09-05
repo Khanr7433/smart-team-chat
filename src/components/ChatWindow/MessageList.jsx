@@ -1,12 +1,13 @@
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import MessageBubble from './MessageBubble'
 import LoadingSpinner from '../common/LoadingSpinner'
+import LoadingSkeleton from '../common/LoadingSkeleton'
 import { NoMessagesState, ErrorState } from '../common/EmptyState'
 import { useToast } from '../common/Toast'
 import { useAccessibility } from '../../hooks/useAccessibility'
 import { getMessagesForConversation } from '../../data'
 
-const MessageList = ({ conversationId }) => {
+const MessageList = React.memo(({ conversationId }) => {
   const messagesEndRef = useRef(null)
   const [messages, setMessages] = useState([])
   const [isLoading, setIsLoading] = useState(true)
@@ -52,17 +53,35 @@ const MessageList = ({ conversationId }) => {
   }, [conversationId, showError])
   
   // Auto-scroll to bottom when messages change
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
+  }, [])
   
   useEffect(() => {
-    scrollToBottom()
-  }, [messages])
+    if (messages.length > 0) {
+      // Add a small delay to ensure DOM is updated
+      const timeoutId = setTimeout(scrollToBottom, 100)
+      return () => clearTimeout(timeoutId)
+    }
+  }, [messages, scrollToBottom])
   
-  const handleRetry = () => {
+  const handleRetry = useCallback(() => {
     window.location.reload()
-  }
+  }, [])
+
+  // Memoize the messages list to prevent unnecessary re-renders
+  const messageElements = useMemo(() => {
+    return messages.map((message, index) => (
+      <div 
+        key={message.id} 
+        role="listitem"
+        className="message-bubble"
+        style={{ animationDelay: `${index * 0.05}s` }}
+      >
+        <MessageBubble message={message} />
+      </div>
+    ))
+  }, [messages])
 
   // Handle case when no conversation is selected
   if (!conversationId) {
@@ -80,8 +99,10 @@ const MessageList = ({ conversationId }) => {
   // Loading state
   if (isLoading) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-gray-50">
-        <LoadingSpinner size="lg" text="Loading messages..." />
+      <div className="flex-1 overflow-y-auto bg-gray-50 lg:bg-gray-25 py-4 lg:py-6">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <LoadingSkeleton type="message" count={4} />
+        </div>
       </div>
     )
   }
@@ -118,17 +139,11 @@ const MessageList = ({ conversationId }) => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Messages list */}
         <div 
-          className="space-y-1 lg:space-y-2"
+          className="space-y-1 lg:space-y-2 stagger-animation"
           role="list"
           aria-label={`${messages.length} message${messages.length !== 1 ? 's' : ''} in conversation`}
         >
-          {messages.map((message) => (
-            <div key={message.id} role="listitem">
-              <MessageBubble 
-                message={message} 
-              />
-            </div>
-          ))}
+          {messageElements}
         </div>
         
         {/* Invisible element to scroll to */}
@@ -136,6 +151,6 @@ const MessageList = ({ conversationId }) => {
       </div>
     </div>
   )
-}
+})
 
 export default MessageList

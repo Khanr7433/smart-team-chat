@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import SummaryModal from './SummaryModal'
 import ReplyModal from './ReplyModal'
 import { ButtonSpinner } from '../common/LoadingSpinner'
@@ -6,7 +6,7 @@ import { useToast } from '../common/Toast'
 import { useAccessibility } from '../../hooks/useAccessibility'
 import { getSummaryForConversation, getRandomSmartReply } from '../../data'
 
-const AIToolbar = ({ conversationId }) => {
+const AIToolbar = React.memo(({ conversationId }) => {
   const [showSummaryModal, setShowSummaryModal] = useState(false)
   const [showReplyModal, setShowReplyModal] = useState(false)
   const [currentSummary, setCurrentSummary] = useState(null)
@@ -17,7 +17,7 @@ const AIToolbar = ({ conversationId }) => {
   const { showError, showSuccess } = useToast()
   const { announceToScreenReader } = useAccessibility()
 
-  const handleSummarizeThread = async () => {
+  const handleSummarizeThread = useCallback(async () => {
     setIsLoadingSummary(true)
     announceToScreenReader('Generating thread summary', 'assertive')
     try {
@@ -32,9 +32,9 @@ const AIToolbar = ({ conversationId }) => {
     } finally {
       setIsLoadingSummary(false)
     }
-  }
+  }, [conversationId, showError, showSuccess, announceToScreenReader])
 
-  const handleSmartReply = async () => {
+  const handleSmartReply = useCallback(async () => {
     setIsLoadingReply(true)
     announceToScreenReader('Generating smart reply suggestion', 'assertive')
     try {
@@ -49,7 +49,7 @@ const AIToolbar = ({ conversationId }) => {
     } finally {
       setIsLoadingReply(false)
     }
-  }
+  }, [showError, showSuccess, announceToScreenReader])
 
   return (
     <>
@@ -62,7 +62,7 @@ const AIToolbar = ({ conversationId }) => {
           <button
             onClick={handleSummarizeThread}
             disabled={isLoadingSummary}
-            className={`w-full sm:w-auto flex items-center justify-center px-4 lg:px-6 py-2 lg:py-3 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+            className={`w-full sm:w-auto flex items-center justify-center px-4 lg:px-6 py-2 lg:py-3 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 hover-lift btn-primary ${
               isLoadingSummary
                 ? 'bg-blue-400 cursor-not-allowed'
                 : 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700 focus:ring-blue-500'
@@ -85,7 +85,7 @@ const AIToolbar = ({ conversationId }) => {
           <button
             onClick={handleSmartReply}
             disabled={isLoadingReply}
-            className={`w-full sm:w-auto flex items-center justify-center px-4 lg:px-6 py-2 lg:py-3 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+            className={`w-full sm:w-auto flex items-center justify-center px-4 lg:px-6 py-2 lg:py-3 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 hover-lift btn-primary ${
               isLoadingReply
                 ? 'bg-green-400 cursor-not-allowed'
                 : 'bg-green-500 hover:bg-green-600 active:bg-green-700 focus:ring-green-500'
@@ -134,6 +134,6 @@ const AIToolbar = ({ conversationId }) => {
       />
     </>
   )
-}
+})
 
 export default AIToolbar

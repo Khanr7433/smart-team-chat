@@ -5,8 +5,13 @@ import { ToastProvider } from './components/common/Toast'
 import { ChatListContainer } from './components/ChatList'
 import { ChatWindowContainer } from './components/ChatWindow'
 import { NewChatContainer } from './components/NewChat'
+import { runPerformanceAudit } from './utils/testOptimizations'
 
 function App() {
+  // Run performance audit in development
+  if (import.meta.env.DEV) {
+    setTimeout(() => runPerformanceAudit(), 1000)
+  }
   return (
     <ErrorBoundary>
       <ToastProvider>

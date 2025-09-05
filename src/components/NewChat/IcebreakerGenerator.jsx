@@ -1,17 +1,17 @@
-import { useState } from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
 import { aiResponses, getRandomIcebreaker } from '../../data'
 import { ButtonSpinner } from '../common/LoadingSpinner'
 import { useToast } from '../common/Toast'
 import IcebreakerModal from './IcebreakerModal'
 
-const IcebreakerGenerator = ({ participantName, onIcebreakerSelected }) => {
+const IcebreakerGenerator = React.memo(({ participantName, onIcebreakerSelected }) => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedIcebreakers, setSelectedIcebreakers] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   
   const { showError, showSuccess } = useToast()
 
-  const generateIcebreakers = async () => {
+  const generateIcebreakers = useCallback(async () => {
     setIsLoading(true)
     try {
       // Generate 3 icebreakers
@@ -44,17 +44,22 @@ const IcebreakerGenerator = ({ participantName, onIcebreakerSelected }) => {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [participantName, showError, showSuccess])
 
-  const handleSelectIcebreaker = (icebreaker) => {
+  const handleSelectIcebreaker = useCallback((icebreaker) => {
     if (onIcebreakerSelected) {
       onIcebreakerSelected(icebreaker)
     }
-  }
+  }, [onIcebreakerSelected])
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setIsModalOpen(false)
-  }
+  }, [])
+
+  const isButtonDisabled = useMemo(() => 
+    !participantName?.trim() || isLoading, 
+    [participantName, isLoading]
+  )
 
   return (
     <>
@@ -69,11 +74,11 @@ const IcebreakerGenerator = ({ participantName, onIcebreakerSelected }) => {
         
         <button
           onClick={generateIcebreakers}
-          disabled={!participantName?.trim() || isLoading}
+          disabled={isButtonDisabled}
           className={`
             w-full flex items-center justify-center px-4 lg:px-6 py-3 lg:py-4 rounded-lg lg:rounded-xl text-sm lg:text-base font-medium
-            transition-all duration-200 border focus:outline-none focus:ring-2 focus:ring-offset-2
-            ${participantName?.trim() && !isLoading
+            transition-all duration-200 border focus:outline-none focus:ring-2 focus:ring-offset-2 hover-lift btn-primary
+            ${!isButtonDisabled
               ? 'bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 active:from-green-700 active:to-blue-700 text-white border-transparent shadow-sm hover:shadow-md focus:ring-blue-500'
               : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed focus:ring-gray-300'
             }
@@ -117,6 +122,6 @@ const IcebreakerGenerator = ({ participantName, onIcebreakerSelected }) => {
       />
     </>
   )
-}
+})
 
 export default IcebreakerGenerator

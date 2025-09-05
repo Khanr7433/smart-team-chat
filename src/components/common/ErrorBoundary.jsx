@@ -25,9 +25,9 @@ class ErrorBoundary extends React.Component {
     if (this.state.hasError) {
       // Custom fallback UI
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-          <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 text-center">
-            <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 animate-fade-in">
+          <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 text-center animate-scale-in">
+            <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center animate-bounce-in">
               <svg 
                 className="w-8 h-8 text-red-600" 
                 fill="none" 
@@ -54,14 +54,14 @@ class ErrorBoundary extends React.Component {
             <div className="space-y-3">
               <button
                 onClick={() => window.location.reload()}
-                className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 hover-lift btn-primary"
               >
                 Refresh Page
               </button>
               
               <button
                 onClick={() => this.setState({ hasError: false, error: null, errorInfo: null })}
-                className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 hover-lift"
               >
                 Try Again
               </button>
