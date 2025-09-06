@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ConversationItem from './ConversationItem'
-import LoadingSpinner from '../common/LoadingSpinner'
 import LoadingSkeleton from '../common/LoadingSkeleton'
 import { NoConversationsState, ErrorState } from '../common/EmptyState'
 import { useToast } from '../common/Toast'
 import { useAccessibility } from '../../hooks/useAccessibility'
-import { conversations } from '../../data/conversations.json'
+import conversationsData from '../../data/conversations.json'
 import { debounce } from '../../utils/performance'
 
 const ChatListContainer = React.memo(({ isDesktopSidebar = false }) => {
@@ -30,6 +29,7 @@ const ChatListContainer = React.memo(({ isDesktopSidebar = false }) => {
         // Simulate loading delay for better UX demonstration
         await new Promise(resolve => setTimeout(resolve, 500))
         
+        const conversations = conversationsData.conversations || []
         if (!conversations || conversations.length === 0) {
           setConversationList([])
           setFilteredConversations([])
@@ -151,7 +151,6 @@ const ChatListContainer = React.memo(({ isDesktopSidebar = false }) => {
             <input
               type="text"
               placeholder="Search conversations..."
-              value={searchTerm}
               onChange={handleSearchChange}
               className="block w-full pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
               aria-label="Search conversations by name or message content"
@@ -203,7 +202,6 @@ const ChatListContainer = React.memo(({ isDesktopSidebar = false }) => {
           <input
             type="text"
             placeholder="Search conversations..."
-            value={searchTerm}
             onChange={handleSearchChange}
             className="block w-full pl-10 lg:pl-12 pr-3 py-2 lg:py-3 text-sm lg:text-base border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
             aria-label="Search conversations by name or message content"

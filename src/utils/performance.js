@@ -1,75 +1,87 @@
-// Performance monitoring utilities
+import React from 'react'
 
-export const measurePerformance = (name, fn) => {
-  return async (...args) => {
-    const start = performance.now()
-    try {
-      const result = await fn(...args)
-      const end = performance.now()
-      console.log(`Performance: ${name} took ${end - start} milliseconds`)
-      return result
-    } catch (error) {
-      const end = performance.now()
-      console.log(`Performance: ${name} failed after ${end - start} milliseconds`)
-      throw error
-    }
+// Debounce utility function
+export const debounce = (func, delay) => {
+  let timeoutId
+  return (...args) => {
+    clearTimeout(timeoutId)
+    timeoutId = setTimeout(() => func.apply(null, args), delay)
   }
 }
 
-export const debounce = (func, wait) => {
-  let timeout
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout)
-      func(...args)
-    }
-    clearTimeout(timeout)
-    timeout = setTimeout(later, wait)
-  }
-}
-
+// Throttle utility function
 export const throttle = (func, limit) => {
   let inThrottle
-  return function() {
-    const args = arguments
-    const context = this
+  return (...args) => {
     if (!inThrottle) {
-      func.apply(context, args)
+      func.apply(null, args)
       inThrottle = true
       setTimeout(() => inThrottle = false, limit)
     }
   }
 }
 
-// Lazy loading utility for components
-export const createLazyComponent = (importFunc) => {
-  return React.lazy(() => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(importFunc())
-      }, 100) // Small delay to show loading state
-    })
-  })
+// Performance measurement utilities
+export const measurePerformance = (name, fn) => {
+  const start = performance.now()
+  const result = fn()
+  const end = performance.now()
+  
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`${name} took ${end - start} milliseconds`)
+  }
+  
+  return result
 }
 
-// Memory usage monitoring
-export const logMemoryUsage = () => {
-  if (performance.memory) {
-    console.log('Memory Usage:', {
-      used: Math.round(performance.memory.usedJSHeapSize / 1048576) + ' MB',
-      total: Math.round(performance.memory.totalJSHeapSize / 1048576) + ' MB',
-      limit: Math.round(performance.memory.jsHeapSizeLimit / 1048576) + ' MB'
+// Memory usage tracking (development only)
+export const trackMemoryUsage = (componentName) => {
+  if (process.env.NODE_ENV === 'development' && 'memory' in performance) {
+    const memInfo = performance.memory
+    console.log(`${componentName} Memory Usage:`, {
+      used: `${Math.round(memInfo.usedJSHeapSize / 1048576)} MB`,
+      total: `${Math.round(memInfo.totalJSHeapSize / 1048576)} MB`,
+      limit: `${Math.round(memInfo.jsHeapSizeLimit / 1048576)} MB`
     })
   }
 }
 
-// Intersection Observer for lazy loading
+// Lazy loading utility
+export const createLazyComponent = (importFunc, fallback = null) => {
+  const LazyComponent = React.lazy(importFunc)
+  
+  return (props) => {
+    return React.createElement(
+      React.Suspense,
+      { fallback },
+      React.createElement(LazyComponent, props)
+    )
+  }
+}
+
+// Intersection Observer utility for lazy loading
 export const createIntersectionObserver = (callback, options = {}) => {
   const defaultOptions = {
     root: null,
-    rootMargin: '50px',
-    threshold: 0.1
+    rootMargin: '0px',
+    threshold: 0.1,
+    ...options
   }
   
-  return new IntersectionObserver(callback, { ...defaultOptions, ...options })
+  return new IntersectionObserver(callback, defaultOptions)
+}
+
+// Request Animation Frame utility
+export const rafScheduler = (callback) => {
+  return requestAnimationFrame(callback)
+}
+
+// Batch DOM updates
+export const batchDOMUpdates = (updates) => {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => {
+      updates.forEach(update => update())
+      resolve()
+    })
+  })
 }

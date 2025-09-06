@@ -1,151 +1,139 @@
-import { useEffect, useRef } from 'react'
+import { useCallback, useRef, useEffect } from 'react'
 
-/**
- * Custom hook for managing accessibility features
- */
 export const useAccessibility = () => {
-  /**
-   * Manages focus for modal dialogs
-   * @param {boolean} isOpen - Whether the modal is open
-   * @param {React.RefObject} modalRef - Reference to the modal element
-   */
-  const useFocusTrap = (isOpen, modalRef) => {
-    const previousActiveElement = useRef(null)
+  const announcementRef = useRef(null)
 
+  const announceToScreenReader = useCallback((message, priority = 'polite') => {
+    if (!message) return
+
+    // Create or update the live region for screen reader announcements
+    let liveRegion = document.getElementById('sr-live-region')
+
+    if (!liveRegion) {
+      liveRegion = document.createElement('div')
+      liveRegion.id = 'sr-live-region'
+      liveRegion.setAttribute('aria-live', priority)
+      liveRegion.setAttribute('aria-atomic', 'true')
+      liveRegion.style.position = 'absolute'
+      liveRegion.style.left = '-10000px'
+      liveRegion.style.width = '1px'
+      liveRegion.style.height = '1px'
+      liveRegion.style.overflow = 'hidden'
+      document.body.appendChild(liveRegion)
+    }
+
+    // Clear previous announcement and set new one
+    liveRegion.textContent = ''
+    setTimeout(() => {
+      liveRegion.textContent = message
+    }, 100)
+
+    // Store reference for cleanup
+    announcementRef.current = liveRegion
+  }, [])
+
+  const setFocusToElement = useCallback((elementId) => {
+    const element = document.getElementById(elementId)
+    if (element) {
+      element.focus()
+    }
+  }, [])
+
+  const trapFocus = useCallback((containerElement) => {
+    if (!containerElement) return
+
+    const focusableElements = containerElement.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    )
+
+    const firstElement = focusableElements[0]
+    const lastElement = focusableElements[focusableElements.length - 1]
+
+    const handleTabKey = (e) => {
+      if (e.key !== 'Tab') return
+
+      if (e.shiftKey) {
+        if (document.activeElement === firstElement) {
+          lastElement.focus()
+          e.preventDefault()
+        }
+      } else {
+        if (document.activeElement === lastElement) {
+          firstElement.focus()
+          e.preventDefault()
+        }
+      }
+    }
+
+    containerElement.addEventListener('keydown', handleTabKey)
+
+    // Return cleanup function
+    return () => {
+      containerElement.removeEventListener('keydown', handleTabKey)
+    }
+  }, [])
+
+  const getAriaLabel = useCallback((baseLabel, count, itemType = 'item') => {
+    if (count === 0) {
+      return `No ${itemType}s`
+    } else if (count === 1) {
+      return `${baseLabel}: 1 ${itemType}`
+    } else {
+      return `${baseLabel}: ${count} ${itemType}s`
+    }
+  }, [])
+
+  const generateId = useCallback((prefix = 'element') => {
+    return `${prefix}-${Math.random().toString(36).substr(2, 9)}`
+  }, [])
+
+  const useFocusTrap = useCallback((isActive, containerRef) => {
     useEffect(() => {
-      if (!isOpen) return
+      if (!isActive || !containerRef.current) return
 
-      // Store the previously focused element
-      previousActiveElement.current = document.activeElement
+      const container = containerRef.current
+      const focusableElements = container.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      )
 
-      // Focus the modal when it opens
-      if (modalRef.current) {
-        modalRef.current.focus()
+      const firstElement = focusableElements[0]
+      const lastElement = focusableElements[focusableElements.length - 1]
+
+      // Focus the first element when the trap becomes active
+      if (firstElement) {
+        firstElement.focus()
       }
 
-      const handleKeyDown = (e) => {
-        if (e.key === 'Escape') {
-          // Let the parent component handle escape key
-          return
-        }
+      const handleTabKey = (e) => {
+        if (e.key !== 'Tab') return
 
-        if (e.key === 'Tab') {
-          const focusableElements = modalRef.current?.querySelectorAll(
-            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-          )
-
-          if (!focusableElements || focusableElements.length === 0) return
-
-          const firstElement = focusableElements[0]
-          const lastElement = focusableElements[focusableElements.length - 1]
-
-          if (e.shiftKey) {
-            // Shift + Tab
-            if (document.activeElement === firstElement) {
-              e.preventDefault()
-              lastElement.focus()
-            }
-          } else {
-            // Tab
-            if (document.activeElement === lastElement) {
-              e.preventDefault()
-              firstElement.focus()
-            }
+        if (e.shiftKey) {
+          if (document.activeElement === firstElement) {
+            lastElement?.focus()
+            e.preventDefault()
+          }
+        } else {
+          if (document.activeElement === lastElement) {
+            firstElement?.focus()
+            e.preventDefault()
           }
         }
       }
 
-      document.addEventListener('keydown', handleKeyDown)
+      container.addEventListener('keydown', handleTabKey)
 
       return () => {
-        document.removeEventListener('keydown', handleKeyDown)
-        
-        // Restore focus to the previously focused element
-        if (previousActiveElement.current) {
-          previousActiveElement.current.focus()
-        }
+        container.removeEventListener('keydown', handleTabKey)
       }
-    }, [isOpen, modalRef])
-  }
-
-  /**
-   * Announces messages to screen readers
-   * @param {string} message - Message to announce
-   * @param {string} priority - Priority level ('polite' or 'assertive')
-   */
-  const announceToScreenReader = (message, priority = 'polite') => {
-    const announcement = document.createElement('div')
-    announcement.setAttribute('aria-live', priority)
-    announcement.setAttribute('aria-atomic', 'true')
-    announcement.className = 'sr-only'
-    announcement.textContent = message
-
-    document.body.appendChild(announcement)
-
-    // Remove the announcement after a short delay
-    setTimeout(() => {
-      document.body.removeChild(announcement)
-    }, 1000)
-  }
-
-  /**
-   * Generates unique IDs for accessibility attributes
-   * @param {string} prefix - Prefix for the ID
-   */
-  const generateId = (prefix = 'accessible') => {
-    return `${prefix}-${Math.random().toString(36).substr(2, 9)}`
-  }
+    }, [isActive, containerRef])
+  }, [])
 
   return {
-    useFocusTrap,
     announceToScreenReader,
-    generateId
+    setFocusToElement,
+    trapFocus,
+    getAriaLabel,
+    generateId,
+    useFocusTrap
   }
-}
-
-/**
- * Hook for managing keyboard navigation in lists
- * @param {Array} items - Array of items
- * @param {Function} onSelect - Function to call when an item is selected
- */
-export const useKeyboardNavigation = (items, onSelect) => {
-  const currentIndex = useRef(-1)
-
-  const handleKeyDown = (e) => {
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault()
-        currentIndex.current = Math.min(currentIndex.current + 1, items.length - 1)
-        break
-      case 'ArrowUp':
-        e.preventDefault()
-        currentIndex.current = Math.max(currentIndex.current - 1, 0)
-        break
-      case 'Home':
-        e.preventDefault()
-        currentIndex.current = 0
-        break
-      case 'End':
-        e.preventDefault()
-        currentIndex.current = items.length - 1
-        break
-      case 'Enter':
-      case ' ':
-        e.preventDefault()
-        if (currentIndex.current >= 0 && items[currentIndex.current]) {
-          onSelect(items[currentIndex.current])
-        }
-        break
-      default:
-        return
-    }
-
-    // Focus the current item
-    const currentItem = document.querySelector(`[data-index="${currentIndex.current}"]`)
-    if (currentItem) {
-      currentItem.focus()
-    }
-  }
-
-  return { handleKeyDown, currentIndex: currentIndex.current }
 }
