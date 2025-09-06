@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import MessageList from './MessageList'
+import MessageInput from './MessageInput'
 import AIToolbar from './AIToolbar'
 import LoadingSpinner from '../common/LoadingSpinner'
 import { ConversationNotFoundState, ErrorState } from '../common/EmptyState'
@@ -14,7 +15,13 @@ const ChatWindowContainer = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
   
-  const { showError } = useToast()
+  const { showError, showSuccess } = useToast()
+
+  const handleSendMessage = useCallback((messageText) => {
+    // In a real app, this would send the message to the backend
+    console.log('Sending message:', messageText, 'to conversation:', id)
+    showSuccess(`Message sent: "${messageText.substring(0, 50)}${messageText.length > 50 ? '...' : ''}"`)
+  }, [id, showSuccess])
 
   useEffect(() => {
     const loadConversation = async () => {
@@ -147,6 +154,12 @@ const ChatWindowContainer = () => {
       
       {/* Messages Area */}
       <MessageList conversationId={id} />
+      
+      {/* Message Input */}
+      <MessageInput 
+        conversationId={id} 
+        onSendMessage={handleSendMessage}
+      />
       
       {/* AI Toolbar */}
       <AIToolbar conversationId={id} />

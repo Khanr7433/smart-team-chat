@@ -1,6 +1,7 @@
 export { default as ChatWindowContainer } from './ChatWindowContainer'
 export { default as MessageList } from './MessageList'
 export { default as MessageBubble } from './MessageBubble'
+export { default as MessageInput } from './MessageInput'
 export { default as AIToolbar } from './AIToolbar'
 export { default as SummaryModal } from './SummaryModal'
 export { default as ReplyModal } from './ReplyModal'
